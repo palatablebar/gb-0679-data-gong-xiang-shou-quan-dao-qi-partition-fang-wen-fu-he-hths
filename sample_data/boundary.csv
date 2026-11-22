@@ -1,0 +1,12 @@
+event_id,principal,resource,partition,access_time,received_at,observed,reported,note
+B0001,analyst,orders,2026-09,2026-11-19T23:58:00Z,2026-11-20T00:01:00Z,blocked,0,临近到期双端互证
+B0002,analyst,orders,2026-09,2026-11-19T23:57:00Z,2026-11-20T00:06:00Z,blocked,0,边界翻转无法互证
+B0003,analyst,orders,2026-09,2026-11-19T23:58:30Z,2026-11-20T00:00:30Z,blocked,0,互证采信来源仍在窗
+B0004,analyst,orders,2026-09,2026-11-19T23:59:00Z,,blocked,0,边界缺接收端
+B0005,analyst,orders,2026-09,2026-11-20T00:00:00,2026-11-20T00:01:00Z,blocked,0,来源失效隔离接收留痕
+B0006,analyst,orders,2026-09,2026-11-10T12:00:00Z,2026-11-10T12:20:00Z,allowed,1,非边界大时差
+B0007,analyst,orders,2026-09,2026-12-01T00:02:00Z,2026-12-01T00:04:00Z,blocked,0,到期后双端互证
+B0008,analyst,orders,2026-09,not-a-time,2026-11-20T00:05:00Z,blocked,0,双端皆不可采信
+B0009,analyst,orders,2026-09,2026-11-10T00:01:00Z,2026-11-10T00:03:00Z,blocked,0,授权起点边界互证
+B0010,analyst,orders,2026-09,2026-11-11T00:00:00Z,,allowed,1,非边界仅来源
+B0001,analyst,orders,2026-09,2026-11-19T23:58:00Z,2026-11-20T00:01:30Z,blocked,0,同访问重试

@@ -2,7 +2,7 @@ from app.modules.m6_audit.rules import evaluate
 from decimal import Decimal
 def test_real_sample_four_books(result): assert result["stages"][5]["metrics"]["balanced"] is True
 def test_real_sample_final_lineage(result):
-    m=result["stages"][5]["metrics"];assert m["accepted_inputs"]+m["quarantine_inputs"]+m["excluded"]==m["input"]
+    m=result["stages"][5]["metrics"];assert m["accepted_inputs"]+m["quarantine_inputs"]+m.get("pending_inputs",0)+m["excluded"]==m["input"]
 def test_real_sample_difference_is_explicit(result):
     rows=result["stages"][5]["rows"];assert any(r["status"]=="差异" for r in rows)
 def test_real_sample_totals_exact(result):

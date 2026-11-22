@@ -1,5 +1,4 @@
 import sqlite3,json
-from pathlib import Path
 from app.config import DATA_DIR
 from app.errors import DomainError
 def connect():
@@ -9,8 +8,24 @@ def connect():
     db.execute("CREATE TABLE IF NOT EXISTS runs (id TEXT PRIMARY KEY,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,decision TEXT NOT NULL DEFAULT '待复核')")
     return db
 def save(run_id,payload):
+    # 同源重跑只复用已有批次，绝不产生第二份结论
     with connect() as db:
         db.execute("INSERT OR IGNORE INTO runs(id,payload) VALUES (?,?)",(run_id,json.dumps(payload,ensure_ascii=False)))
+    return get(run_id)
+def replace_payload(run_id,payload,fail=False):
+    """整段替换在单事务内提交：任何中断（含 fail 注入）都回滚，旧版完整恢复。
+
+    双端原始时间保存在 payload 内，替换失败时随旧版一并保留，不出现半写状态。
+    """
+    db=connect()
+    try:
+        db.execute("BEGIN")
+        db.execute("UPDATE runs SET payload=? WHERE id=?",(json.dumps(payload,ensure_ascii=False),run_id))
+        if fail: raise RuntimeError("替换中断注入")
+        db.commit()
+    except Exception:
+        db.rollback();db.close();raise
+    db.close()
     return get(run_id)
 def get(run_id):
     with connect() as db: row=db.execute("SELECT payload,version,decision FROM runs WHERE id=?",(run_id,)).fetchone()

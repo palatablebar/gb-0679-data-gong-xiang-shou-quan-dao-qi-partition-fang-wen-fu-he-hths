@@ -1,7 +1,7 @@
 from app.modules.m3_grants.rules import evaluate,validate_grants,GRANTS
 from app.errors import DomainError
 import pytest
-def access(at="2026-12-01T00:00:00Z",resource="orders"):return {"access_time":at,"reported":"1","principal":"analyst","resource":resource,"partition":"2026-09"}
+def access(at="2026-12-01T00:00:00Z",resource="orders"):return {"access_time":at,"received_at":at,"reported":"1","principal":"analyst","resource":resource,"partition":"2026-09"}
 def test_expiry_endpoint_excluded():
     "TRAP-23"
     assert evaluate([access()],{})["rows"][0]["candidate_count"]==0

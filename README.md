@@ -25,6 +25,8 @@ docker compose exec -T app pytest -q
 
 拒绝规则优先于允许，授权必须同时命中资源、分区和生效窗；显式拒绝不得被宽授权覆盖。
 
+到期边界访问先定唯一有效时点：双端时间在时钟容差（默认300秒，参数clock_skew_seconds）内互证时采来源时间；无法互证的边界访问留待核，不进入授权、分区与对账结论；非边界访问即使钟差超容差仍采来源并留痕。双端原始时间全程保留，同一访问重试不新增结论，批次替换在单事务内完成、中断恢复旧版。详见docs/DATA-DICTIONARY.md。
+
 ## 演示
 
 1. 打开首页，核对当次计算、差异和隔离原因。
@@ -34,7 +36,7 @@ docker compose exec -T app pytest -q
 
 ## 输入与输出
 
-输入列见 `docs/DATA-DICTIONARY.md`。项目包含dirty.csv、clean.csv、legacy.csv，统一走实际导入路径。上传限制4MB，拒绝不带时区的时间。业务键按字符串保留，Decimal参与计算，空值不会当零。
+输入列见 `docs/DATA-DICTIONARY.md`。项目包含dirty.csv、clean.csv、legacy.csv与boundary.csv，统一走实际导入路径。上传限制4MB，拒绝不带时区的时间。业务键按字符串保留，Decimal参与计算，空值不会当零。
 
 `POST /api/runs` 接收sample或csv；`GET /api/runs`返回历史批次；`POST /api/runs/<id>/review`需要version与decision；`GET /api/runs/<id>/archive`返回唯一证据导出。
 

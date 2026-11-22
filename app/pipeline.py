@@ -13,16 +13,18 @@ from app.modules.m6_audit.rules import evaluate as stage6
 from app.modules.m7_seals.rules import evaluate as stage7
 STAGES=[stage1,stage2,stage3,stage4,stage5,stage6,stage7]
 def load_sample(name):
-    if name not in {"dirty.csv","clean.csv","legacy.csv"}: raise DomainError("BAD_SAMPLE","样例不存在",404)
+    if name not in {"dirty.csv","clean.csv","legacy.csv","boundary.csv"}: raise DomainError("BAD_SAMPLE","样例不存在",404)
     return (ROOT/"sample_data"/name).read_bytes()
 def calculate(raw,params=None,stop=6):
-    params=params or {};started=time.monotonic();context={"parameters":params,"raw":raw,"quarantine":[]};stages=[];rows=[]
+    params=params or {};started=time.monotonic();context={"parameters":params,"raw":raw,"quarantine":[],"pending":[]};stages=[];rows=[]
     for index,stage in enumerate(STAGES[:stop+1]):
         result=stage(raw if index==0 else rows,context)
         result=scalar(result);rows=result["rows"]
         context["quarantine"].extend(result.get("quarantine",[]))
+        context["pending"].extend(result.get("pending",[]))
         if index==0: context["intake"]=result["metrics"]
         result["cumulative_quarantine"]=list(context["quarantine"])
+        result["cumulative_pending"]=list(context["pending"])
         context[MODULES[index][0]]=result
         stages.append(result)
     return {"run_id":digest(raw,params)[:20],"stages":stages,"manifest":manifest(raw,params,started),"parameters":params}
@@ -32,7 +34,7 @@ def stage_preview(index,payload):
     if "rows" in payload and index>0:
         if not isinstance(payload["rows"],list) or any(not isinstance(row,dict) for row in payload["rows"]): raise DomainError("BAD_ROWS","记录需要对象列表")
         if not isinstance(payload.get("context",{}),dict): raise DomainError("BAD_CONTEXT","上下文需要对象")
-        return scalar(STAGES[index](payload["rows"],payload.get("context",{"parameters":{},"quarantine":[]})))
+        return scalar(STAGES[index](payload["rows"],payload.get("context",{"parameters":{},"quarantine":[],"pending":[]})))
     raw=payload.get("csv")
     raw=raw.encode() if isinstance(raw,str) else load_sample(payload.get("sample","dirty.csv"))
     return calculate(raw,payload.get("parameters",{}),index)["stages"][-1]

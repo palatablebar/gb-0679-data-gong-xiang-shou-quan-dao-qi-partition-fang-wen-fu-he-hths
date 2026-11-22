@@ -29,6 +29,10 @@
 | TRAP-07 | 上游结果空值 | 误报拒绝 | 隔离缺失 | `app/values.py` | `tests/test_m3.py::test_real_missing_decision_not_zero` |
 | TRAP-19 | 允许与拒绝重叠 | 后写覆盖 | 拒绝优先且排序证据 | `app/modules/m4_conflicts/rules.py` | `tests/test_m4.py::test_deny_priority_counterexample` |
 | TRAP-23 | 授权到期点 | 多放行一次 | 半开生效窗 | `app/modules/m3_grants/rules.py` | `tests/test_m3.py::test_expiry_endpoint_excluded` |
+| TRAP-30 | 到期边界单端取时 | 只信来源放过到期后伪造，只信接收误拦临近到期合法读取 | 双端容差互证采来源，无法互证的边界访问留待核 | `app/timing.py` | `tests/test_timing.py::test_verified_within_skew_adopts_source`、`tests/test_timing.py::test_post_expiry_forgery_cannot_pass` |
+| TRAP-31 | 同访问重试 | 重试生成第二份结论 | 同键仅重试字段差异时并入首条，不新增结论，双端原始时间留痕 | `app/modules/m1_accesses/rules.py` | `tests/test_boundary.py::test_retry_does_not_add_conclusion` |
+| TRAP-32 | 替换中断 | 半写状态污染批次 | payload整段替换包在单事务，中断回滚恢复旧版 | `app/store.py` | `tests/test_boundary.py::test_replacement_interruption_restores_old_version` |
+| TRAP-33 | 来源时间失效 | 被留待核吞掉，绕过INVALID_TIME隔离 | 来源失效一律INVALID_TIME隔离，接收端仅兜底留痕 | `app/modules/m3_grants/rules.py` | `tests/test_boundary.py::test_invalid_source_is_quarantined_not_held` |
 
 ## 对账规则
 
